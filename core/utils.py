@@ -7,9 +7,18 @@
 import shutil
 import os
 
+import hashlib
 
-def remove_tmp():
-    shutil.rmtree("tmp")
-    os.remove("index.m3u8")
-    os.remove("index.m3u8.new")
-    os.remove("key.key")
+
+def remove_tmp(path, output):
+    if os.path.exists(output + ".mp4"):
+        shutil.rmtree(path)
+
+
+def get_random_tmp_path(url):
+    ran = hashlib.sha1(url.encode('utf-8')).hexdigest()
+    index_file = ran + "/index.m3u8"
+    new_index_file = ran + "/index.m3u8.new"
+    key_file = ran + "/key.key"
+    ts_files = ran + "/tmp"
+    return index_file, new_index_file, key_file, ts_files, ran

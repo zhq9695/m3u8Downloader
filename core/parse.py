@@ -8,26 +8,32 @@
 import os
 
 
-def parse_m3u8():
-    with open("index.m3u8", 'r') as f:
+def parse_m3u8(index_path, new_index_path, key_path, ts_path):
+    if os.path.exists(new_index_path):
+        return
+
+    with open(index_path, 'r') as f:
         lines = f.readlines()
 
-    for file in os.listdir('tmp'):
+    for file in os.listdir(ts_path):
         for i in range(len(lines)):
             if file in lines[i]:
                 lines[i] = "tmp/{}".format(file) + '\n'
 
     for i in range(len(lines)):
         if 'URI' in lines[i]:
-            lines[i] = lines[i][:lines[i].find("URI") + 4] + '"key.key"' + '\n'
+            lines[i] = '{}"key.key"\n'.format(lines[i][:lines[i].find("URI") + 4])
 
-    new_path = "index.m3u8.new"
-    with open(new_path, 'w') as f:
+    with open(new_index_path, 'w') as f:
         f.writelines(lines)
 
 
-def output_mp4(output):
-    cmd = 'ffmpeg -allowed_extensions ALL -protocol_whitelist "file,http,https,tls,crypto,tcp" -i index.m3u8.new -acodec copy -vcodec copy -f mp4 {}.mp4'.format(
-        output)
+def output_mp4(new_index_path, output):
+    output_path = output + ".mp4"
+    if os.path.exists(output_path):
+        return
+
+    cmd = 'ffmpeg -allowed_extensions ALL -protocol_whitelist "file,http,https,tls,crypto,tcp" -i {} -acodec copy ' \
+          '-vcodec copy -f mp4 {}'.format(new_index_path, output_path)
 
     os.system(cmd)

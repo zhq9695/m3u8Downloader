@@ -9,29 +9,35 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-def download_m3u8(url):
+def download_m3u8(url, output_path):
+    if os.path.exists(output_path):
+        return
+
     content = _download(url)
 
-    with open("index.m3u8", 'wb') as f:
+    with open(output_path, 'wb') as f:
         f.write(content)
 
 
-def download_key():
-    with open("index.m3u8", "r") as f:
+def download_key(index_path, key_output_path):
+    if os.path.exists(key_output_path):
+        return
+
+    with open(index_path, "r") as f:
         lines = f.readlines()
     for line in lines:
-        if 'URI' in line:
+        if 'key.key' in line:
             url = line[line.find("URI") + 5:-2]
 
             content = _download(url)
 
-            with open("key.key", 'wb') as f:
+            with open(key_output_path, 'wb') as f:
                 f.write(content)
 
 
-def download_ts(max_workers=40):
+def download_ts(index_path, ts_output_path, max_workers=40):
     urls = []
-    with open("index.m3u8", "r") as f:
+    with open(index_path, "r") as f:
         lines = f.readlines()
     for line in lines:
         if '.ts' in line:
@@ -40,7 +46,7 @@ def download_ts(max_workers=40):
     executor = ThreadPoolExecutor(max_workers=max_workers)
     all_task = []
     for url in urls:
-        all_task.append(executor.submit(_download_ts, (url)))
+        all_task.append(executor.submit(_download_ts, url, ts_output_path,))
 
     cnt = 0
     for future in as_completed(all_task):
@@ -48,14 +54,14 @@ def download_ts(max_workers=40):
         print("[{}/{}]".format(cnt, len(all_task)))
 
 
-def _download_ts(url):
+def _download_ts(url, output_path):
     file_name = url.split('/')[-1]
-    if file_name in os.listdir("tmp"):
+    if file_name in os.listdir(output_path):
         return
 
     content = _download(url)
 
-    with open('tmp/{}'.format(file_name), 'wb') as f:
+    with open('{}/{}'.format(output_path, file_name), 'wb') as f:
         f.write(content)
 
 

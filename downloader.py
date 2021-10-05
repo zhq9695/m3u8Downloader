@@ -9,43 +9,45 @@ import os
 
 from core.download import download_m3u8, download_ts, download_key
 from core.parse import parse_m3u8, output_mp4
-from core.utils import remove_tmp
+from core.utils import remove_tmp, get_random_tmp_path
 
 
 class Downloader:
-    def __init__(self, m3u8_url, output_name):
-        if not os.path.exists("tmp"):
-            os.mkdir("tmp")
-
+    def __init__(self, m3u8_url, output_path):
         self.m3u8_url = m3u8_url
-        self.output_name = output_name
+        self.output_path = output_path
+
+        self.index_path, self.new_index_path, \
+        self.key_path, self.ts_path, self.ran = get_random_tmp_path(m3u8_url)
+
+        if not os.path.exists(self.ran):
+            os.mkdir(self.ran)
+        if not os.path.exists(self.ts_path):
+            os.mkdir(self.ts_path)
 
         self.do()
 
     def do(self):
         print("Download m3u8 file.")
-        download_m3u8(self.m3u8_url)
+        download_m3u8(self.m3u8_url, self.index_path)
 
         print("Download key file.")
-        download_key()
-
+        download_key(self.index_path, self.key_path)
 
         print("Download ts files.")
-        download_ts(40)
+        download_ts(self.index_path, self.ts_path, 40)
 
         print("Parse m3u8 file.")
-        parse_m3u8()
+        parse_m3u8(self.index_path, self.new_index_path, self.key_path, self.ts_path)
 
         print("Output mp4.")
-        output_mp4(self.output_name)
+        output_mp4(self.new_index_path, self.output_path)
 
         print("Remove tmp files.")
-        remove_tmp()
+        remove_tmp(self.ran, self.output_path)
 
         print("Finish!")
 
 
 if __name__ == '__main__':
-    m3u8_url = ""
-    output_name = ""
-    Downloader(m3u8_url, output_name)
+    Downloader("https://video.dious.cc/20200728/hS0gQJm7/2000kb/hls/index.m3u8", "TheWalkingDeadS03E14")
