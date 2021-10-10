@@ -6,8 +6,8 @@
 
 import shutil
 import os
-
 import hashlib
+from tkinter import *
 
 
 def remove_tmp(path, output):
@@ -22,3 +22,13 @@ def get_random_tmp_path(url):
     key_file = ran + "/key.key"
     ts_files = ran + "/tmp"
     return index_file, new_index_file, key_file, ts_files, ran
+
+
+def _print(str, output_text):
+    if output_text is None:
+        print(str)
+    else:
+        output_text.configure(state=NORMAL)
+        output_text.insert(INSERT, str + "\n")
+        output_text.configure(state=DISABLED)
+        output_text.see(END)

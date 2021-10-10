@@ -6,6 +6,7 @@
 
 import os
 import requests
+from core.utils import _print
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -35,7 +36,7 @@ def download_key(index_path, key_output_path):
                 f.write(content)
 
 
-def download_ts(index_path, ts_output_path, max_workers=40):
+def download_ts(index_path, ts_output_path, use_gui, max_workers=40):
     urls = []
     with open(index_path, "r") as f:
         lines = f.readlines()
@@ -46,12 +47,12 @@ def download_ts(index_path, ts_output_path, max_workers=40):
     executor = ThreadPoolExecutor(max_workers=max_workers)
     all_task = []
     for url in urls:
-        all_task.append(executor.submit(_download_ts, url, ts_output_path,))
+        all_task.append(executor.submit(_download_ts, url, ts_output_path, ))
 
     cnt = 0
     for future in as_completed(all_task):
         cnt += 1
-        print("[{}/{}]".format(cnt, len(all_task)))
+        _print("[{}/{}]".format(cnt, len(all_task)), use_gui)
 
 
 def _download_ts(url, output_path):
