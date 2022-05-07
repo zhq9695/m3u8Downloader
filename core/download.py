@@ -36,12 +36,16 @@ def download_key(index_path, key_output_path):
                 f.write(content)
 
 
-def download_ts(index_path, ts_output_path, use_gui, max_workers=40):
+def download_ts(index_path, ts_output_path, m3u8_url, use_gui, max_workers=40):
+    pre_url = m3u8_url[:m3u8_url.find("index")]
+
     urls = []
     with open(index_path, "r") as f:
         lines = f.readlines()
     for line in lines:
-        if '.ts' in line:
+        if '.ts' in line and 'http' not in line:
+            urls.append(pre_url + line[:-1])
+        elif '.ts' in line:
             urls.append(line[:-1])
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -56,6 +60,7 @@ def download_ts(index_path, ts_output_path, use_gui, max_workers=40):
 
 
 def _download_ts(url, output_path):
+    print(url)
     file_name = url.split('/')[-1]
     if file_name in os.listdir(output_path):
         return

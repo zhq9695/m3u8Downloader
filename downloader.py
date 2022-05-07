@@ -23,7 +23,8 @@ class Downloader:
             return
 
         self.index_path, self.new_index_path, \
-        self.key_path, self.ts_path, self.ran = get_random_tmp_path(m3u8_url)
+            self.key_path, self.ts_path, self.ran = get_random_tmp_path(
+                m3u8_url)
 
         if not os.path.exists(self.ran):
             os.mkdir(self.ran)
@@ -40,19 +41,24 @@ class Downloader:
         download_key(self.index_path, self.key_path)
 
         _print("Download ts files.", self.use_gui)
-        download_ts(self.index_path, self.ts_path, self.use_gui, 40)
+        download_ts(self.index_path, self.ts_path,
+                    self.m3u8_url, self.use_gui, 40)
 
         _print("Parse m3u8 file.", self.use_gui)
-        parse_m3u8(self.index_path, self.new_index_path, self.key_path, self.ts_path)
+        parse_m3u8(self.index_path, self.new_index_path,
+                   self.key_path, self.ts_path)
 
         _print("Output mp4.", self.use_gui)
         output_mp4(self.new_index_path, self.output_path)
 
         _print("Remove tmp files.", self.use_gui)
-        remove_tmp(self.ran, self.output_path)
+        flag = remove_tmp(self.ran, self.output_path)
 
-        _print("Finish!", self.use_gui)
+        if flag:
+            _print("Success!", self.use_gui)
+        else:
+            _print("Fail!", self.use_gui)
 
 
 if __name__ == '__main__':
-    Downloader("https://v10.dious.cc/20210917/8CXvJMIV/1000kb/hls/index.m3u8", "鱿鱼游戏03")
+    Downloader("https://b-hls-19.strpst.com/hls/37598507/37598507.m3u8", "123")

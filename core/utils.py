@@ -13,6 +13,9 @@ from tkinter import *
 def remove_tmp(path, output):
     if os.path.exists(output + ".mp4"):
         shutil.rmtree(path)
+        return True
+    else:
+        return False
 
 
 def get_random_tmp_path(url):
